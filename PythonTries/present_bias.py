@@ -25,19 +25,15 @@ with open(args.graphFile) as g:
         cost.append(x)
 g.close()
 way=[]
-#print(cost)
-#visited=[False for x in graph.keys()]
 def findPaths(g,s,t,path=[],paths=[]):
     visit=[False for x in graph.keys()]
     stringIssues=list(g.keys())
     visit[stringIssues.index(s)]= True
     path.append(s)
     mid=[]
-    #print(path)
     if s==t:
         mid = path.copy()
         paths.append(mid)
-        #print(paths)
     else:
         for x in g[s]:
             if not visit[stringIssues.index(x)]:
@@ -45,11 +41,8 @@ def findPaths(g,s,t,path=[],paths=[]):
     path.pop()
     visit[stringIssues.index(s)]= False
     return paths
-####stop here
-#
-#
-# continue
-def findCost( path, price):
+
+def findCost(path,price):
     pathCost=[]
     for x in path:
         cost = 0
@@ -61,87 +54,70 @@ def findCost( path, price):
                     cost = cost + p[2]
         pathCost.append(cost)
     return pathCost
-  ###$stop here
-  ###
-  ###continue
-  ##stop here
-  ###
-  ###continue
+
 def findMinCostPath(minCost,path):
      cost =99999999999999999
      for x in range(len(minCost)-1):
-
          if  minCost[x]<cost :
             index = x
             cost=minCost[x]
      print(path[index],minCost[index])
-####stop here
-###
-###continue
-def bestPath(costs):
-    ex=-1
-    for i in range(len(costs)) :
-        #print("help!")
-        if costs[i] != -1:
-            ex=i
-            break #WE NEED TO FIND AN I THAT ITS NOT -1
+     return len(path[index])
 
-    for k in range(ex,len(costs)):
-        if costs[k] != -1 and costs[k] <=costs[ex] :
-            ex = k
-        #    print("help!!!")
-    return ex
-####stop here
-###
-###continue
-def findGuyPath(paths,bias,pathCost):
-    firstNode=paths[0][0]
-    while firstNode!=paths[0][len(paths)-1]:
-        biasCost=[]
-    #    print("hel")
-        for x in paths :
-            #print("help")
-            if x[0] ==firstNode:
-                biasCost.append(getBiasCost(x,bias,pathCost))
-                x.remove(firstNode)
+def findBiasCostPath(cost):
+    min =10000
+    index=0
+    for c in range(len(cost)):
+        if cost[c]!= -1:
+            if cost[c] < min:
+                min=cost[c]
+                index =c
+    return index
+
+def findBiasCostAndPath(path,cost):
+    costs = 0
+    for p in range(len(path)-1):
+        for c in cost:
+            if path[p] == c[0] and path[p+1]==c[1]:
+                costs = costs + c[2]
+    print(path,costs)
+
+def findGuyPath(paths,bias,pathCost,start,end):
+    firstNode =start #take the Start node
+    biasPath=[]
+    biasPath.append(firstNode)
+    while firstNode != end : #While start node != end node
+        cost=[]
+        bestNode=[]
+        for x in paths :  #we take every path
+            if x[0] == firstNode:
+                 cost.append(getBiasCost(x,bias,pathCost))
+                 x.remove(firstNode)
             else:
-                biasCost.append(-1)
-        guyPath=bestPath(biasCost)
-        firstNode=paths[guyPath][0]
-    return guyPath
-####stop here
-###
-###
+                cost.append(-1)
+        firstNode=paths[findBiasCostPath(cost)][0]
+        biasPath.append(firstNode)
+    findBiasCostAndPath(biasPath,pathCost)
+
 def getBiasCost(path,b,pathCost):
     counter = 1
-    cost=0
-    cost1=0
-    for k in range(len(path)-1):
-    #    print("h")
-        for p in pathCost:
-    #        print("he")
-            if p[0]==path[k] and p[1]==path[k+1] :
-                if counter == 1:
-                    cost1 =  int(p[2])
-#                    print(cost1)
-                else :
-                    cost1 =p[2]*b
-                    # print(cost1)
-                cost= cost + int(cost1)
-        counter = counter + 1
+    cost = 0
+    k = float(b)
+    for p in range(len(path) - 1) :
+        for cp in pathCost :
+            if path[p] == cp[0] and path[p+1] == cp[1]:
+                if counter==1:
+                    cost = cost + cp[2]
+                    counter = counter+1
+                else:
+                    cost = cost + k*cp[2]
+                    #print(type(cp[2]*b))
     return cost
-####stop here
-###
-###
+
 way=findPaths(graph,args.start,args.end)
 realCost=findCost(way,cost)
 findMinCostPath(realCost,way)
-b=args.parameter
 way1=[]
 for p in way:
     way1.append(p.copy())
-
-#print(way1)
-index = findGuyPath(way1,b,cost)
-#print (index,way)
-print (way[index],realCost[index])
+index = findGuyPath(way1,args.parameter,cost,args.start,args.end)
